@@ -1,198 +1,182 @@
-"""
-Demo script showcasing different user personas interacting with the assistant.
+# Quick Start Guide
 
-This script demonstrates how the conversational agent adapts to different
-communication styles and handles various edge cases.
-"""
+## 🚀 Setup & Run (5 Minutes)
 
-# Test Scenarios for the Conversational Company Research Assistant
+### 1. Environment Setup
+```bash
+cd "d:\Company AI"
+python -m venv venv
+.\venv\Scripts\activate
+pip install -r requirements.txt
+```
 
-## Test Persona 1: Confused User
-"""
-User: "um i need info on that tech company"
-Expected Agent Behavior:
-- Ask clarifying questions
-- Provide examples
-- Be patient and helpful
+### 2. Configure API Keys (.env file)
+```env
+NEWSAPI_KEY=get_from_newsapi.org
+HUNTER_API_KEY=get_from_hunter.io
+BRANDFETCH_API_KEY=get_from_brandfetch.com
+OPENAI_API_KEY=required_for_AI_summaries
 
-Agent: "I'd be happy to help! Could you tell me the company name? For example, 'Microsoft' or 'Salesforce'."
+LINKEDIN_CLIENT_ID=optional
+LINKEDIN_CLIENT_SECRET=optional
+LINKEDIN_ACCESS_TOKEN=optional
 
-User: "the one that makes iphones"
-Agent: "Got it! You're looking for Apple Inc. Let me gather comprehensive information..."
-[Proceeds with research]
-"""
+OPENCORPORATES_API_KEY=optional_skip_if_empty
+```
 
-## Test Persona 2: Efficient User
-"""
-User: "Research Stripe, focus on recent funding and competitive position"
-Expected Agent Behavior:
-- Direct and concise responses
-- Minimal small talk
-- Quick execution
+**Get Free API Keys:**
+- NewsAPI: https://newsapi.org/ (100/day FREE)
+- Hunter.io: https://hunter.io/ (25/month FREE)
+- Brandfetch: https://brandfetch.com/ (100/month FREE)
+- OpenAI: https://platform.openai.com/ (Pay-per-use)
 
-Agent: "Researching Stripe - prioritizing funding data and competitive analysis. One moment..."
-[Returns structured data quickly]
-[Presents key findings in bullet points]
-"""
+### 3. Run Application
+```bash
+streamlit run app.py
+```
+Open browser → `http://localhost:8501`
 
-## Test Persona 3: Chatty User
-"""
-User: "Hey! So I'm thinking about Shopify, they're pretty cool right? My friend works there actually..."
-Expected Agent Behavior:
-- Conversational and warm
-- Acknowledge comments
-- Engage naturally
+---
 
-Agent: "Shopify is indeed impressive! Let me pull together their latest company data. Should I include info about their workplace culture since you have a connection there?"
+## 📋 Important Info
 
-User: "Yeah that would be awesome! Also what do you think about their stock lately?"
-Agent: "I'll add culture info! As for stock - I focus on company research rather than investment advice, but I can show you their recent financial performance and growth metrics if that helps?"
-"""
+### What It Does
+- Researches companies from multiple sources (LinkedIn, News, Web)
+- Generates account plans (Overview, Team, Financials, SWOT, Opportunities, Risks)
+- Exports to PDF/DOCX
+- Adapts to your conversation style
 
-## Test Persona 4: Edge Case User
-"""
-Scenario A: Extremely long input
-User: [Pastes 5000 word essay about various tech companies]
-Expected Agent Behavior:
-- Politely truncate/summarize
-- Request clarification
-- Stay helpful
+### Data Sources Priority
+1. **LinkedIn API** (best data: founded, industry, employees, HQ)
+2. **Hunter.io** (domain, email patterns)
+3. **Brandfetch** (logos, brand assets)
+4. **NewsAPI** (recent news)
+5. **Web Scraping** (fallback)
 
-Agent: "I received a large input. Could you summarize what you need in a sentence or two? For example: 'Research [Company] and focus on [specific areas]'."
+### Response Time
+- Research: 5-10 seconds
+- Account Plan: Instant
+- Export: 2-3 seconds
 
-Scenario B: Invalid company name
-User: "Analyze xyzzqwert123"
-Agent: "I couldn't find a company named 'xyzzqwert123'. Could you double-check the spelling or provide more context?"
+---
 
-Scenario C: Ambiguous company name
-User: "Research Apple"
-Agent: "I found 3 companies named 'Apple'. Did you mean Apple Inc. (tech company), Apple Records (music), or Apple Bank (financial)?"
-"""
+## 🧪 Quick Test
 
-## Test Persona 5: Technical User
-"""
-User: "I need a comprehensive analysis of Salesforce including their ARR, customer acquisition costs, competitive moat, and technology stack. Focus on enterprise segment."
+### Test 1: Simple Research
+```
+You: "Research Microsoft"
+Expected: Account plan generated in ~10 seconds
+```
 
-Expected Agent Behavior:
-- Detailed technical responses
-- Include metrics and data
-- Professional terminology
+### Test 2: Specific Request
+```
+You: "Analyze Google, focus on AI products"
+Expected: Detailed account plan with AI focus
+```
 
-Agent: "Initiating comprehensive Salesforce analysis. Data sources: Clearbit (firmographic), NewsAPI (market intelligence), web scraping (tech stack). Processing..."
+### Test 3: Export
+```
+Click "Export as PDF" or "Export as DOCX"
+Expected: Download professional report
+```
 
-[Returns detailed report with:]
-- ARR: $31.35B (FY2024)
-- Technology Stack: [List of technologies]
-- Competitive Analysis: [Detailed breakdown]
-- Enterprise Metrics: [Specific data points]
-"""
+---
 
-## Edge Case Handling Examples
+## ⚠️ Troubleshooting
 
-### 1. API Failure Scenario
-"""
-User: "Research Tesla"
-[NewsAPI times out]
+| Issue | Solution |
+|-------|----------|
+| "None" values | Add LinkedIn API token or wait for web scraping |
+| Slow response | Normal (5-10s for multiple API calls) |
+| API errors | Check .env keys, some APIs optional |
+| Module not found | `pip install -r requirements.txt` |
 
-Agent Response (Confused User): "I'm having a temporary issue with the news service, but don't worry - I'll use other sources to get you the information."
+---
 
-Agent Response (Efficient User): "NewsAPI unavailable. Using alternative sources."
+## 📝 Testing Checklist
 
-Agent Response (Technical User): "NewsAPI timeout detected. Falling back to web scraping + Clearbit. Estimated completion: 15s."
-"""
+### Must Test
+- [ ] Company research completes successfully
+- [ ] Account plan displays all 6 sections
+- [ ] PDF export works
+- [ ] DOCX export works
+- [ ] Chat history maintained
 
-### 2. Conflicting Data Scenario
-"""
-[During research, finds CEO name differs between sources]
+### Optional Test
+- [ ] LinkedIn data appears (if API configured)
+- [ ] News articles loaded (if NewsAPI key valid)
+- [ ] Multiple companies in same session
 
-Agent Response (Confused User):
-"I found different information about the CEO. Let me show you what I have:
-• Elon Musk (from company website, updated 2024)
-• Elon Musk (from Clearbit, cached 2023)
+---
 
-Both sources agree - looks good! Proceeding with Elon Musk."
+## 🔑 Key Features
 
-Agent Response (Technical User):
-"Data inconsistency detected in field: CEO
-• Source A (company_website): Elon Musk [Priority: 8, Fresh: 2024-11-24]
-• Source B (clearbit): Elon Musk [Priority: 10, Cached: 2023-06-15]
-Auto-resolved: Using Source B due to higher priority."
-"""
+1. **Multi-source aggregation** - Combines 5+ data sources
+2. **Smart fallbacks** - Works even if some APIs fail
+3. **Clean UI** - Simple, professional interface
+4. **Adaptive conversation** - Detects your style
+5. **Professional exports** - PDF & DOCX ready to share
 
-### 3. Empty Results Scenario
-"""
-User: "Find information about Acme Corporation"
-[No results found]
+---
 
-Agent Response (Confused User):
-"Hmm, I'm not finding anything for 'Acme Corporation'. This could mean:
-- The company name might be spelled differently
-- It might be a very new or private company
-- It could be operating under a different legal name
+## 💬 Sample Conversations
 
-Could you provide more details like their website or what industry they're in?"
+### Example 1: Basic Research
+```
+You: "Research Microsoft"
+Bot: "Researching Microsoft. I'll gather information from multiple sources..."
+Bot: "✅ Research complete for Microsoft! Review the account plan below."
+→ Account plan shows: Overview, Team, Financials, SWOT, Opportunities, Risks
+```
 
-Agent Response (Efficient User):
-"No results for 'Acme Corporation'. Verify spelling or provide domain/URL?"
-"""
+### Example 2: Specific Focus
+```
+You: "Analyze Tesla, focus on recent news"
+Bot: "On it. Analyzing Tesla with emphasis on recent activity..."
+Bot: "✅ Research complete! Check the Recent Activity section for latest news."
+```
 
-## Conversation Flow Test
+### Example 3: Export
+```
+You: "Export Microsoft plan as PDF"
+→ Click "Export as PDF" button
+→ professional_report.pdf downloads
+```
 
-### Full Interaction Example (Adaptive Agent)
-"""
-User: "hi"
-Agent: "Hello! I'm your Company Research Assistant. I can help you research companies and generate detailed account plans. Which company would you like to explore?"
+---
 
-User: "um... i'm not sure exactly what you do?"
-[Agent detects confusion, adjusts response style]
-Agent: "No problem! I make it easy to research companies. Just tell me a company name (like 'Netflix' or 'Zoom'), and I'll:
-1. Find the latest news about them
-2. Get their company info (size, location, leadership)
-3. Create a professional account plan you can download
+## 🐛 Common Issues
 
-Want to try it with a company you're curious about?"
+**"None" or "N/A" in results:**
+- Missing API keys → Add to .env
+- LinkedIn not configured → Add token or use web scraping
+- Company not found → Try domain name instead
 
-User: "ok let's try Netflix"
-Agent: "Perfect! Netflix is a great choice. Let me gather information for you. This will take about 30 seconds..."
-[Shows progress indicators]
-[Research completes]
-Agent: "All done! I've created your account plan for Netflix. Take a look and let me know if you want me to explore anything in more detail. You can also download it as a PDF or Word document!"
+**Slow performance:**
+- Normal: 5-10 seconds (sequential API calls)
+- Check terminal for specific API timeouts
 
-User: "thanks! this is really helpful"
-Agent: "You're welcome! Let me know if you need anything else."
-"""
+**Import errors:**
+```bash
+pip install -r requirements.txt --upgrade
+```
 
-## Testing Checklist
+---
 
-Run through these scenarios to validate the agent:
+## 📊 Expected Output
 
-□ Confused user gets clarifying questions
-□ Efficient user gets direct, brief responses  
-□ Chatty user gets conversational, friendly responses
-□ Technical user gets detailed, data-driven responses
-□ Long input is handled gracefully
-□ Invalid company names produce helpful error messages
-□ Ambiguous queries trigger clarification requests
-□ API failures are transparently communicated with fallbacks
-□ Conflicting data is detected and resolved (or user is asked)
-□ Empty results provide actionable next steps
-□ Persona detection adapts within 2-3 messages
-□ Status updates are shown during long operations
-□ Account plans are generated correctly
-□ Export functionality works for both PDF and DOCX
-□ Conversation history is maintained across interactions
-□ Reset functionality clears state properly
+### Account Plan Structure:
+1. **Overview** - Name, industry, founded, employees, HQ
+2. **Team** - Leadership, executives, LinkedIn profiles
+3. **Financials** - Revenue, funding, company type
+4. **SWOT** - Strengths, weaknesses, opportunities, threats
+5. **Opportunities** - Strategic fit, entry points
+6. **Risks** - Competitive, financial, timing risks
 
-## Performance Benchmarks
+### Export Formats:
+- **PDF**: Professional, read-only report
+- **DOCX**: Editable Word document
 
-Target response times:
-- Simple query processing: < 500ms
-- Company research (all sources): 15-30 seconds
-- Account plan generation: < 5 seconds
-- PDF export: < 3 seconds
-- DOCX export: < 2 seconds
+---
 
-User experience goals:
-- Persona detection accuracy: > 80% by 3rd message
-- API fallback success rate: > 95%
-- User satisfaction (subjective): "Helpful and adaptive"
+**That's it! Start with `streamlit run app.py` and type a company name.** 🚀
