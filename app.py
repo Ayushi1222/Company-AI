@@ -39,137 +39,12 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-    /* Main header styling */
-    .main-header {
-        font-size: 2.2rem;
-        color:
-        font-weight: 600;
-        margin: 0;
-        padding: 0;
-        line-height: 1.2;
-    }
-    
-    /* Navbar container */
-    div[data-testid="column"] {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    /* Button styling */
     .stButton button {
-        height: 2.8rem;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        border-radius: 8px;
-        font-size: 0.95rem;
-    }
-    
-    .stButton button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-    
-    /* Sidebar styling */
-    [data-testid="stSidebar"] {
-        background-color:
-    }
-    
-    [data-testid="stSidebar"] > div:first-child {
-        padding-top: 2rem;
-    }
-    
-    [data-testid="stSidebar"] h2 {
-        color:
-        font-size: 1.3rem;
-        margin-top: 0.5rem;
-        margin-bottom: 0.8rem;
-        font-weight: 600;
-    }
-    
-    [data-testid="stSidebar"] .stMarkdown {
-        font-size: 0.95rem;
-    }
-    
-    /* Chat messages */
-    .user-message {
-        padding: 1rem;
-        border-radius: 10px;
-        margin: 0.5rem 0;
-        background-color:
-        border-left: 4px solid
-    }
-    
-    .assistant-message {
-        padding: 1rem;
-        border-radius: 10px;
-        margin: 0.5rem 0;
-        border-left: 4px solid
-    }
-    
-    .status-box {
-        padding: 0.5rem;
         border-radius: 5px;
-        border-left: 4px solid
     }
-    
-    /* Section headers */
-    .section-header {
-        color:
-        border-bottom: 2px solid
-        padding-bottom: 0.5rem;
-        margin-top: 1.5rem;
-        font-weight: 600;
-    }
-    
-    /* Navbar alignment */
-    .navbar-container {
-        display: flex;
-        align-items: center;
-        padding: 0.5rem 0;
-        margin-bottom: 0.5rem;
-    }
-    
-    /* Download button styling */
     .stDownloadButton button {
+        background-color: #0066cc;
         color: white;
-        font-weight: 600;
-        height: 3rem;
-        font-size: 1.1rem;
-    }
-    
-    .stDownloadButton button:hover {
-        transform: scale(1.02);
-    }
-    
-    /* Expander styling */
-    .streamlit-expanderHeader {
-        font-weight: 600;
-        color:
-    }
-    
-    /* Divider styling */
-    hr {
-        margin: 1rem 0;
-        border-color:
-    }
-    
-    /* Tab styling */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
-    }
-    
-    .stTabs [data-baseweb="tab"] {
-        font-weight: 500;
-        padding: 0.5rem 1.5rem;
-        border-radius: 8px 8px 0 0;
-    }
-    
-    /* Success/Error message styling */
-    .stSuccess, .stError, .stWarning, .stInfo {
-        border-radius: 8px;
-        padding: 1rem;
-        margin: 0.5rem 0;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -294,8 +169,6 @@ def display_account_plan():
     
     for tab, (section_key, section) in zip(tabs, sections.items()):
         with tab:
-            st.markdown(f"
-            
             content = section['content']
             
             if isinstance(content, dict):
@@ -467,18 +340,14 @@ def main():
     st.divider()
     
     with st.sidebar:
-        st.markdown("
+        st.markdown("### 🎯 About This Assistant")
         st.markdown("""
-        <div style=" padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
-            <p style="margin: 0; line-height: 1.6;">This AI assistant helps you:</p>
-            <ul style="margin: 0.5rem 0; padding-left: 1.2rem; line-height: 1.8;">
-                <li>Research companies from multiple sources</li>
-                <li>Generate comprehensive account plans</li>
-                <li>Export professional reports</li>
-                <li>Adapt to your communication style</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
+        This AI assistant helps you:
+        - Research companies from multiple sources
+        - Generate comprehensive account plans
+        - Export professional reports
+        - Adapt to your communication style
+        """)
         
         persona = conv_manager.get_persona()
         if persona != "neutral":
@@ -486,12 +355,12 @@ def main():
         
         st.divider()
         
-        st.markdown("
+        st.markdown("### ⚙️ API Status")
         show_missing_api_keys_warning()
         
         st.divider()
         
-        st.markdown("
+        st.markdown("### 📊 Session Info")
         col_info1, col_info2 = st.columns(2)
         with col_info1:
             st.metric("Messages", len(st.session_state.messages))
@@ -520,24 +389,14 @@ def main():
             """)
         
         st.markdown("---")
-        st.markdown("""
-            <div style="text-align: center; font-size: 0.85rem; color:
-                <p>v1.0.0 | Built with ❤️</p>
-            </div>
-        """, unsafe_allow_html=True)
+        st.caption("v1.0.0 | Built with ❤️")
     
-    st.markdown('<h3 style="color:
+    st.header("💬 Conversation")
     
     chat_container = st.container()
     with chat_container:
         if not st.session_state.messages:
-            st.markdown("""
-                <div style="text-align: center; padding: 3rem 1rem; background-color:
-                            border-radius: 12px; border: 2px dashed
-                    <h4 style="color:
-                    <p style="color:
-                </div>
-            """, unsafe_allow_html=True)
+            st.info("👋 Welcome! Ask me to research any company.")
         else:
             for message in st.session_state.messages:
                 display_chat_message(

@@ -51,7 +51,7 @@ class PDFExporter:
             'CustomTitle',
             parent=styles['Heading1'],
             fontSize=24,
-            textColor=colors.HexColor('
+            textColor=colors.HexColor('#1a1a1a'),
             spaceAfter=30,
             alignment=TA_CENTER,
         )
@@ -59,7 +59,7 @@ class PDFExporter:
             'CustomHeading',
             parent=styles['Heading2'],
             fontSize=16,
-            textColor=colors.HexColor('
+            textColor=colors.HexColor('#2c3e50'),
             spaceAfter=12,
             spaceBefore=12,
         )
