@@ -48,6 +48,74 @@ LINKEDIN_ACCESS_TOKEN=optional
 OPENCORPORATES_API_KEY=optional
 ```
 
+### 🔐 How to Generate LinkedIn Access Token
+
+LinkedIn uses OAuth 2.0. Follow these steps:
+
+**1. Create LinkedIn App**
+- Go to https://www.linkedin.com/developers/apps
+- Click "Create app"
+- Fill in: App name, LinkedIn Page, App logo
+- Check "Sign In with LinkedIn" product
+- Submit for verification
+
+**2. Get Credentials**
+- Go to "Auth" tab in your app
+- Copy **Client ID** and **Client Secret**
+- Add redirect URL: `http://localhost:8501/callback`
+
+**3. Generate Access Token**
+
+**Option A - Using OAuth Playground:**
+```bash
+# Authorization URL (paste in browser)
+https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=YOUR_CLIENT_ID&redirect_uri=http://localhost:8501/callback&scope=r_organization_social%20r_basicprofile%20r_1st_connections_size
+
+# After authorization, you'll get a CODE in the URL
+# Exchange code for token:
+curl -X POST https://www.linkedin.com/oauth/v2/accessToken \
+  -d "grant_type=authorization_code" \
+  -d "code=YOUR_CODE" \
+  -d "client_id=YOUR_CLIENT_ID" \
+  -d "client_secret=YOUR_CLIENT_SECRET" \
+  -d "redirect_uri=http://localhost:8501/callback"
+```
+
+**Option B - Using Python:**
+```python
+import requests
+
+# Step 1: Visit this URL in browser
+auth_url = f"https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=YOUR_CLIENT_ID&redirect_uri=http://localhost:8501/callback&scope=r_organization_social"
+
+# Step 2: After authorization, extract code from redirect URL
+# Step 3: Exchange code for token
+response = requests.post('https://www.linkedin.com/oauth/v2/accessToken', data={
+    'grant_type': 'authorization_code',
+    'code': 'CODE_FROM_STEP_2',
+    'client_id': 'YOUR_CLIENT_ID',
+    'client_secret': 'YOUR_CLIENT_SECRET',
+    'redirect_uri': 'http://localhost:8501/callback'
+})
+
+token = response.json()['access_token']
+print(f"Access Token: {token}")
+```
+
+**4. Add to .env**
+```env
+LINKEDIN_CLIENT_ID=your_client_id
+LINKEDIN_CLIENT_SECRET=your_client_secret
+LINKEDIN_ACCESS_TOKEN=your_access_token_from_step_3
+```
+
+**Note**: LinkedIn access tokens expire after **60 days**. You'll need to regenerate them periodically.
+
+**Required Scopes**:
+- `r_organization_social` - Read organization data
+- `r_basicprofile` - Read basic profile
+- `r_1st_connections_size` - Read connection count
+
 ## � How It Works
 
 1. **Input**: Type company name (e.g., "Research Microsoft")
