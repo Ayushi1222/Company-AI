@@ -1,0 +1,43 @@
+# Core Dependencies
+streamlit==1.29.0
+python-dotenv==1.0.0
+
+# Data Processing
+pandas==2.1.4
+numpy==1.26.2
+
+# Web Scraping
+scrapy==2.11.0
+requests==2.31.0
+beautifulsoup4==4.12.2
+selenium==4.16.0
+
+# API Clients
+newsapi-python==0.2.7
+# Note: Hunter.io and Brandfetch use standard requests library (no special package needed)
+
+# PDF Processing
+PyPDF2==3.0.1
+pdfplumber==0.10.3
+
+# Document Export
+python-docx==1.1.0
+fpdf==1.7.2
+reportlab==4.0.7
+
+# AI/NLP (Optional but recommended)
+openai==1.6.1
+langchain==0.1.0
+langchain-openai==0.0.2
+
+# Text-to-Speech (Optional)
+gTTS==2.4.0
+pyttsx3==2.90
+
+# Database
+sqlalchemy==2.0.23
+
+# Utilities
+Pillow==10.1.0
+validators==0.22.0
+tqdm==4.66.1
