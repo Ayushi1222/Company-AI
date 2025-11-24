@@ -218,12 +218,36 @@ class DataAggregator:
         for field in consolidated.keys():
             if field == "social_media":
                 consolidated[field] = self._merge_social_media(source_data)
+            elif field == "location":
+                location = self._merge_location(source_data)
+                if location:
+                    consolidated[field] = location
             else:
                 value = self._get_field_by_priority(field, source_data)
                 if value:
                     consolidated[field] = value
         
         return consolidated
+    
+    def _merge_location(self, source_data: Dict) -> Dict:
+        location = {}
+        
+        if "linkedin" in source_data and source_data["linkedin"]:
+            hq = source_data["linkedin"].get("headquarters")
+            if hq and isinstance(hq, dict):
+                location = hq
+        
+        if not location and "opencorporates" in source_data:
+            oc_data = source_data["opencorporates"]
+            if oc_data and oc_data.get("registered_address"):
+                addr = oc_data["registered_address"]
+                location = {
+                    "city": addr.get("locality", ""),
+                    "state": addr.get("region", ""),
+                    "country": addr.get("country", "")
+                }
+        
+        return location
     
     def _merge_social_media(self, source_data: Dict) -> Dict:
         social_media = {}
@@ -291,6 +315,7 @@ class DataAggregator:
                 "brandfetch": "industry",
             },
             "status": {
+                "linkedin": "company_type",
                 "opencorporates": "status",
             },
             "social_media": {

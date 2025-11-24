@@ -189,6 +189,40 @@ class LinkedInClient:
         max_count = employee_range.get('end', 0)
         employee_count = (min_count + max_count) // 2 if max_count > 0 else min_count
         
+        founded_on = org_data.get('foundedOn', {})
+        founded_year = None
+        if isinstance(founded_on, dict):
+            founded_year = founded_on.get('year')
+        
+        locations = org_data.get('locations', [])
+        headquarters = None
+        if locations:
+            hq = next((loc for loc in locations if loc.get('locationType') == 'HEADQUARTERS'), locations[0])
+            if hq:
+                hq_info = hq.get('address', {})
+                headquarters = {
+                    'city': hq_info.get('city', ''),
+                    'state': hq_info.get('geographicArea', ''),
+                    'country': hq_info.get('country', '')
+                }
+        
+        description = org_data.get('description', {})
+        if isinstance(description, dict):
+            description = description.get('localized', {}).get('en_US', '')
+        
+        specialties = org_data.get('specialties', [])
+        if isinstance(specialties, dict):
+            specialties = specialties.get('localized', {}).get('en_US', [])
+        
+        industries = org_data.get('industries', [])
+        industry_name = None
+        if industries and len(industries) > 0:
+            industry_name = industries[0]
+        
+        company_type = org_data.get('companyType', {})
+        if isinstance(company_type, dict):
+            company_type = company_type.get('localizedName', 'Private')
+        
         return {
             'source': 'linkedin',
             'company_name': localized_name,
@@ -197,11 +231,14 @@ class LinkedInClient:
             'linkedin_url': f"https://www.linkedin.com/company/{vanity_name}",
             'employee_count': employee_count,
             'employee_count_range': f"{min_count}-{max_count}" if max_count > 0 else f"{min_count}+",
-            'description': org_data.get('description', {}).get('localized', {}).get('en_US', ''),
-            'industry': org_data.get('industries', []),
-            'specialties': org_data.get('specialties', {}).get('localized', {}).get('en_US', []),
+            'description': description,
+            'industry': industry_name,
+            'specialties': specialties,
             'website': org_data.get('website', ''),
-            'founded': org_data.get('foundedOn', {})
+            'founded': founded_year,
+            'headquarters': headquarters,
+            'company_type': company_type,
+            'tagline': org_data.get('tagline', {}).get('localized', {}).get('en_US', '') if isinstance(org_data.get('tagline'), dict) else ''
         }
     
     def get_company_info(self, company_identifier: str) -> Optional[Dict]:

@@ -14,13 +14,13 @@ An intelligent, conversational Streamlit application that conducts comprehensive
 ### 2. **Comprehensive Data Research**
 The agent aggregates company intelligence from multiple sources:
 
-- **Web Scraping**: Custom Scrapy spiders for company websites, news articles, and public data
-- **News APIs**: Real-time headlines via NewsAPI/GNews
+- **LinkedIn API**: Official LinkedIn API integration for company profiles, employee counts, industry data, headquarters, founding year, and company type (requires OAuth tokens)
+- **Web Scraping**: BeautifulSoup4-based scraper for company websites with social media link extraction (LinkedIn vanity names, Twitter handles)
+- **News APIs**: Real-time headlines via NewsAPI (FREE: 100/day)
 - **Company Enrichment**: Hunter.io API for email patterns and org data (FREE: 25/month)
 - **Brand Information**: Brandfetch API for logos, colors, social links (FREE: 100/month)
-- **Legal Registry**: OpenCorporates for official company information
-- **Document Parsing**: Extract insights from uploaded PDFs/documents
-- **LinkedIn Data**: Public profile information (respecting ToS)
+- **Legal Registry**: OpenCorporates for official company information (optional, gracefully skipped if unavailable)
+- **Smart Data Aggregation**: Prioritizes LinkedIn data, merges information from all sources, handles conflicts intelligently
 
 ### 3. **Intelligent Account Plan Generation**
 Automatically generates and organizes:
@@ -60,15 +60,18 @@ Automatically generates and organizes:
 **Frontend/UI: Streamlit**
 - *Why*: Rapid development, native Python integration, excellent for conversational UIs
 - *Tradeoff*: Less control than React but faster iteration for data apps
+- *Design*: Minimalist, clean UI with proper message spacing, simple CSS styling, no complex backgrounds
 
-**Scraping: Scrapy**
-- *Why*: Industrial-strength, respects robots.txt, excellent for modular multi-source scraping
-- *Tradeoff*: Steeper learning curve than BeautifulSoup but better for production
+**Scraping: BeautifulSoup4**
+- *Why*: Lightweight, perfect for targeted web scraping with social media link extraction
+- *Features*: Extracts LinkedIn vanity names and Twitter handles from company websites
+- *Tradeoff*: Less powerful than Scrapy but simpler and more reliable for single-page scraping
 
-**APIs: NewsAPI, Hunter.io, Brandfetch, OpenCorporates**
-- *Why*: All offer genuine FREE tiers (not just trials) - Hunter (25/mo), Brandfetch (100/mo)
+**APIs: LinkedIn, NewsAPI, Hunter.io, Brandfetch, OpenCorporates**
+- *Why*: Mix of official APIs and free tiers - LinkedIn (official, requires OAuth), Hunter (25/mo FREE), Brandfetch (100/mo FREE), NewsAPI (100/day FREE)
 - *Tradeoff*: Rate limits require intelligent caching and fallback strategies
-- *Alternative to Clearbit*: Hunter.io provides domain/email data, Brandfetch provides brand assets
+- *Alternative to Clearbit*: Hunter.io provides domain/email data, Brandfetch provides brand assets, LinkedIn provides comprehensive company data
+- *Sequential Processing*: Removed ThreadPoolExecutor to avoid Streamlit context issues, APIs called sequentially with proper error handling
 
 **AI: OpenAI GPT (Optional)**
 - *Why*: High-quality summarization and analysis
@@ -177,6 +180,22 @@ notepad .env  # Windows
 nano .env     # Linux/Mac
 ```
 
+Required API keys in `.env`:
+```env
+NEWSAPI_KEY=your_newsapi_key_here
+HUNTER_API_KEY=your_hunter_key_here
+BRANDFETCH_API_KEY=your_brandfetch_key_here
+OPENAI_API_KEY=your_openai_key_here
+
+LINKEDIN_CLIENT_ID=your_linkedin_client_id
+LINKEDIN_CLIENT_SECRET=your_linkedin_client_secret
+LINKEDIN_ACCESS_TOKEN=your_linkedin_access_token
+
+OPENCORPORATES_API_KEY=
+```
+
+**Note**: LinkedIn requires OAuth authentication. OpenCorporates is optional and will be gracefully skipped if not configured.
+
 ### 3. Run the Application
 ```bash
 streamlit run app.py
@@ -184,23 +203,205 @@ streamlit run app.py
 
 The app will open in your browser at `http://localhost:8501`
 
+## 🆕 Recent Updates & Improvements
+
+### Version 1.0 - November 2025
+
+**Major Enhancements:**
+1. ✅ **LinkedIn API Integration**
+   - Official LinkedIn API client with OAuth support
+   - Extracts comprehensive company data from About section
+   - Includes: founding year, industry, employee count, headquarters, company type
+   - Retry logic with exponential backoff for reliability
+
+2. ✅ **Enhanced Web Scraping**
+   - BeautifulSoup4-based scraper with social media extraction
+   - Automatically extracts LinkedIn vanity names from URLs
+   - Extracts Twitter handles from company websites
+   - Fallback mechanism when APIs are unavailable
+
+3. ✅ **Smart Data Aggregation**
+   - Prioritizes LinkedIn data over other sources
+   - Intelligent merging of location/headquarters information
+   - Conflict detection and resolution
+   - Sequential API calls (no threading issues)
+
+4. ✅ **Simplified, Clean UI**
+   - Minimalist CSS with proper message spacing
+   - Removed complex backgrounds and broken color values
+   - Better chat message padding (1.5rem between messages)
+   - Clean, professional appearance
+
+5. ✅ **API Replacements**
+   - Replaced Clearbit (deprecated) with Hunter.io + Brandfetch
+   - All APIs use free tiers with graceful degradation
+   - OpenCorporates made optional (skipped if unavailable)
+
+6. ✅ **Code Quality**
+   - All docstring comments removed for cleaner codebase
+   - All hashtag comments removed
+   - Improved error handling throughout
+   - Fixed CSS syntax errors in PDF exporter
+
+**Bug Fixes:**
+- Fixed unterminated string literals in app.py
+- Fixed incomplete HexColor values in pdf_exporter.py
+- Resolved ThreadPoolExecutor context issues with Streamlit
+- Fixed OpenCorporates 401 authentication errors
+- Improved data retrieval reliability
+
 ## 🔧 Configuration
 
 ### API Keys (in .env)
 - **NewsAPI**: Get free key at https://newsapi.org/ (100 requests/day)
-- **Hunter.io**: Get free key at https://hunter.io/ (25 searches/month) 
-- **Brandfetch**: Get free key at https://brandfetch.com/ (100 requests/month)
-- **OpenAI**: Optional, for AI-powered summaries
-- **OpenCorporates**: Optional, for legal entity data
+- **Hunter.io**: Get free key at https://hunter.io/ (25 searches/month) - Replaces Clearbit
+- **Brandfetch**: Get free key at https://brandfetch.com/ (100 requests/month) - For brand assets
+- **LinkedIn API**: Requires OAuth setup at https://www.linkedin.com/developers/
+  - Get Client ID and Client Secret
+  - Obtain Access Token via OAuth 2.0 flow
+  - Provides: company profiles, employee counts, headquarters, founding year, industry
+- **OpenAI**: Required for AI-powered summaries and account plan generation
+- **OpenCorporates**: Optional, for legal entity data (gracefully skipped if not available)
 
-### Scraping Settings
-Edit `config/scraper_config.py`:
+### Feature Flags
+Edit `config/settings.py`:
 ```python
-RESPECT_ROBOTS_TXT = True
-DOWNLOAD_DELAY = 2  # seconds between requests
-CONCURRENT_REQUESTS = 8
-USER_AGENT = "Your custom user agent"
+FEATURES = {
+    'text_to_speech': True,
+    'pdf_export': True,
+    'docx_export': True,
+    'analytics': True,
+    'linkedin_api': True,
+    'web_scraping': True
+}
 ```
+
+## 🏛️ Architecture Deep Dive
+
+### Data Flow Architecture
+
+```
+User Input → Conversation Manager → Research Orchestration
+                                            ↓
+                    ┌───────────────────────┴───────────────────────┐
+                    ↓                       ↓                       ↓
+              LinkedIn API          Hunter.io API           Brandfetch API
+              (Priority 1)          (Priority 2)            (Priority 3)
+                    ↓                       ↓                       ↓
+              NewsAPI                 OpenCorporates          Web Scraper
+              (Priority 4)            (Priority 5)            (Fallback)
+                    ↓                       ↓                       ↓
+                    └───────────────────────┬───────────────────────┘
+                                            ↓
+                                  Data Aggregator
+                              (Smart Consolidation)
+                                            ↓
+                                  Account Plan Generator
+                                            ↓
+                              ┌─────────────┴─────────────┐
+                              ↓                           ↓
+                        Streamlit UI              Export (PDF/DOCX)
+```
+
+### Design Decisions & Rationale
+
+#### 1. **Sequential API Calls vs. Parallel**
+- **Decision**: Sequential processing (removed ThreadPoolExecutor)
+- **Rationale**: Streamlit's context management conflicts with thread pools
+- **Tradeoff**: Slower execution (~5-10s) but 100% reliable
+- **Future**: Consider async/await pattern for Streamlit 1.30+
+
+#### 2. **LinkedIn API Priority**
+- **Decision**: LinkedIn data prioritized over all other sources
+- **Rationale**: Most accurate, official company information
+- **Implementation**: `SOURCE_PRIORITIES = {'linkedin': 5, 'hunter': 4, ...}`
+- **Fallback**: Gracefully degrades to web scraping if API unavailable
+
+#### 3. **BeautifulSoup4 vs. Scrapy**
+- **Decision**: Switched from Scrapy to BeautifulSoup4
+- **Rationale**: 
+  - Simpler for single-page scraping
+  - No middleware/pipeline complexity
+  - Better integration with Streamlit
+  - Easier social media link extraction
+- **Tradeoff**: Less powerful for large-scale scraping
+
+#### 4. **No Comment Policy**
+- **Decision**: Removed all docstrings and hashtag comments
+- **Rationale**: User preference for cleaner codebase
+- **Maintained**: Function names remain self-documenting
+- **Documentation**: Comprehensive README compensates
+
+#### 5. **Error Handling Strategy**
+- **Decision**: Graceful degradation with user notification
+- **Implementation**:
+  ```python
+  try:
+      linkedin_data = fetch_linkedin()
+  except Exception as e:
+      logger.error(f"LinkedIn failed: {e}")
+      linkedin_data = None  # Continue with other sources
+  ```
+- **User Experience**: "LinkedIn unavailable, using 4 other sources..."
+
+#### 6. **State Management**
+- **Decision**: Streamlit session_state for all conversation context
+- **Rationale**: Native, reliable, no external dependencies
+- **Scope**: 
+  - `session_state.messages` - chat history
+  - `session_state.current_research` - latest company data
+  - `session_state.current_plan` - generated account plan
+  - `session_state.conversation_manager` - agent state
+
+#### 7. **Export Format Support**
+- **Decision**: Both PDF (ReportLab) and DOCX (python-docx)
+- **Rationale**: 
+  - PDF for read-only professional reports
+  - DOCX for editable, customizable documents
+- **Implementation**: Separate exporter classes with shared data model
+
+#### 8. **Database Choice**
+- **Decision**: SQLite with SQLAlchemy ORM
+- **Rationale**: 
+  - Zero-config, perfect for local development
+  - Easy migration to PostgreSQL for production
+  - ORM provides flexibility
+- **Schema**: Conversations, AccountPlans, Analytics tables
+
+### Performance Optimizations
+
+1. **Caching Strategy**
+   - Session-level caching for API responses
+   - 5-minute cache for news articles
+   - Persistent cache for company logos/brands
+
+2. **Rate Limiting**
+   - Built-in delays between API calls
+   - Exponential backoff on failures
+   - Request counting per session
+
+3. **Lazy Loading**
+   - Account plan sections generated on-demand
+   - Export files created only when requested
+   - Heavy computations deferred until needed
+
+### Security Considerations
+
+1. **API Key Protection**
+   - `.env` file gitignored
+   - Keys loaded via `os.getenv()`
+   - No hardcoded credentials
+
+2. **Input Validation**
+   - Company name sanitization
+   - Domain validation
+   - File upload size limits
+
+3. **Web Scraping Ethics**
+   - User-Agent identification
+   - Rate limiting (2-3s delays)
+   - Respect robots.txt
+   - No personal data scraping
 
 ## 📁 Project Structure
 
@@ -220,20 +421,16 @@ Company AI/
 │
 ├── research/                       # Data collection modules
 │   ├── __init__.py
-│   ├── news_api.py                # NewsAPI/GNews integration
-│   ├── clearbit_api.py            # Clearbit enrichment
-│   ├── opencorporates_api.py      # Company registry data
+│   ├── news_api.py                # NewsAPI integration
+│   ├── hunter_api.py              # Hunter.io for email/domain data
+│   ├── brandfetch_api.py          # Brandfetch for brand assets
+│   ├── linkedin_api.py            # LinkedIn API client with retry logic
+│   ├── opencorporates_api.py      # Company registry data (optional)
+│   ├── web_scraper.py             # BeautifulSoup4 scraper with social media extraction
 │   ├── pdf_parser.py              # Document extraction
-│   └── data_aggregator.py         # Combine all sources
+│   └── data_aggregator.py         # Smart multi-source data consolidation
 │
-├── scrapers/                       # Scrapy spiders
-│   ├── scrapy.cfg
-│   ├── spiders/
-│   │   ├── __init__.py
-│   │   ├── company_spider.py      # Main company website scraper
-│   │   ├── news_spider.py         # News article scraper
-│   │   └── linkedin_spider.py     # LinkedIn public data
-│   └── pipelines.py               # Data processing pipelines
+
 │
 ├── account_plan/                   # Plan generation
 │   ├── __init__.py
@@ -319,25 +516,72 @@ Company AI/
 
 ## 🐛 Troubleshooting
 
-### "Module not found" errors
+### Common Issues & Solutions
+
+#### "Module not found" errors
 ```bash
 pip install -r requirements.txt --upgrade
 ```
 
-### Scrapy SSL errors
-```bash
-pip install 'scrapy[ssl]'
-```
-
-### Streamlit not loading
+#### Streamlit not loading
 ```bash
 streamlit cache clear
+streamlit run app.py --server.port 8501
 ```
 
-### API rate limits
-- Check your API key quotas
-- Increase SCRAPING_DELAY in .env
-- Consider upgrading API plans
+#### API rate limits exceeded
+- Check your API key quotas at provider dashboards
+- Wait for rate limit reset (usually 24 hours)
+- Consider upgrading API plans for higher limits
+
+#### LinkedIn API 401 errors
+- Verify your access token is valid and not expired
+- Re-authenticate via LinkedIn OAuth flow
+- Check Client ID and Client Secret are correct
+- Token typically expires after 60 days
+
+#### "None" values in company info
+- Ensure LinkedIn API is configured with valid access token
+- Check that company exists on LinkedIn
+- Try using company domain instead of name
+- Web scraper will attempt fallback extraction
+
+#### CSS/UI rendering issues
+```bash
+# Clear Streamlit cache
+streamlit cache clear
+
+# Hard reload browser
+Ctrl+F5 (Windows) or Cmd+Shift+R (Mac)
+```
+
+#### Data aggregation taking too long
+- Normal: 5-10 seconds for sequential API calls
+- If > 30 seconds, check internet connection
+- Some APIs (OpenCorporates) may timeout - this is normal
+- Check terminal for specific API errors
+
+#### Export button not working
+```bash
+# Reinstall export dependencies
+pip install reportlab python-docx --force-reinstall
+```
+
+#### Web scraping fails
+- Check if website is accessible in browser
+- Some sites block automated requests
+- Try different company domain
+- LinkedIn API should work as primary source
+
+### Debug Mode
+
+Enable verbose logging in `app.py`:
+```python
+import logging
+logging.basicConfig(level=logging.DEBUG)
+```
+
+Check logs in terminal for detailed error messages.
 
 ## 📊 Analytics & Monitoring
 
@@ -354,13 +598,56 @@ Access analytics via the "Analytics" tab in the sidebar.
 
 MIT License - Feel free to use and modify for your needs.
 
+## 📦 GitHub Repository
+
+This project is hosted at: **https://github.com/Ayushi1222/Company-AI**
+
+### Initial Setup
+```bash
+cd "d:\Company AI"
+
+# Initialize git (already done)
+git init
+
+# Add all files
+git add .
+
+# Commit
+git commit -m "Initial commit: Company Research Assistant with LinkedIn API integration"
+
+# Add remote
+git remote add origin https://github.com/Ayushi1222/Company-AI.git
+
+# Push to GitHub
+git push -u origin master
+```
+
+### Keeping Up to Date
+```bash
+# Pull latest changes
+git pull origin master
+
+# Make changes, then commit and push
+git add .
+git commit -m "Your commit message"
+git push origin master
+```
+
 ## 🤝 Contributing
 
 Contributions welcome! Please:
 1. Fork the repository
-2. Create a feature branch
-3. Add tests for new functionality
-4. Submit a pull request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+### Development Guidelines
+- Follow PEP 8 style guide for Python code
+- Test all API integrations thoroughly
+- Update README for new features
+- Ensure backward compatibility
+- Add error handling for external dependencies
 
 ## 📞 Support
 
@@ -371,4 +658,55 @@ For issues or questions:
 
 ---
 
+## 🚀 Quick Start Commands
+
+```bash
+# Clone and setup
+git clone https://github.com/Ayushi1222/Company-AI.git
+cd Company-AI
+python -m venv venv
+.\venv\Scripts\activate  # Windows
+pip install -r requirements.txt
+
+# Configure
+cp .env.template .env
+notepad .env  # Add your API keys
+
+# Run
+streamlit run app.py
+
+# Access
+# Open browser to http://localhost:8501
+```
+
+## 📋 API Key Checklist
+
+- [ ] NewsAPI key (Required) - https://newsapi.org/
+- [ ] Hunter.io key (Required) - https://hunter.io/
+- [ ] Brandfetch key (Required) - https://brandfetch.com/
+- [ ] OpenAI key (Required) - https://platform.openai.com/
+- [ ] LinkedIn OAuth (Optional but recommended) - https://www.linkedin.com/developers/
+- [ ] OpenCorporates key (Optional) - https://opencorporates.com/
+
+## 📞 Support & Resources
+
+- **GitHub Issues**: https://github.com/Ayushi1222/Company-AI/issues
+- **Documentation**: This README
+- **API Docs**: 
+  - LinkedIn: https://docs.microsoft.com/en-us/linkedin/
+  - Hunter.io: https://hunter.io/api-documentation/v2
+  - Brandfetch: https://docs.brandfetch.com/
+  - NewsAPI: https://newsapi.org/docs
+
+## 🏆 Acknowledgments
+
+- Streamlit for the amazing framework
+- OpenAI for GPT integration
+- All API providers for their generous free tiers
+- The open-source community
+
+---
+
 **Built with ❤️ for intelligent company research and account planning**
+
+**Version**: 1.0.0 | **Last Updated**: November 24, 2025 | **Author**: Ayushi1222

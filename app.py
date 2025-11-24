@@ -46,6 +46,13 @@ st.markdown("""
         background-color: #0066cc;
         color: white;
     }
+    .stChatMessage {
+        margin-bottom: 1.5rem !important;
+        padding: 1rem !important;
+    }
+    [data-testid="stChatMessageContent"] {
+        padding: 0.5rem 0 !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 

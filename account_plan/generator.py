@@ -35,11 +35,12 @@ class AccountPlanGenerator:
         return plan
     
     def _generate_overview(self, data: Dict, news: list) -> Dict:
+        company_name = data.get("name", "N/A")
         return {
             "title": "Company Overview",
             "content": {
-                "company_name": data.get("name", "N/A"),
-                "legal_name": data.get("legal_name", "N/A"),
+                "company_name": company_name,
+                "legal_name": data.get("legal_name", company_name),
                 "domain": data.get("domain", "N/A"),
                 "description": data.get("description", "No description available"),
                 "founded": data.get("founded", "N/A"),
